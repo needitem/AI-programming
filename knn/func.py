@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 def init_data2():
-    with open("../apple_quality.csv") as f1:
+    with open("../Data/apple_quality.csv") as f1:
         apple = pd.read_csv(f1)
     return apple
 
