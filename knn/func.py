@@ -1,12 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pickle
-import pdb
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.decomposition import PCA
+
 
 def init_data2():
-    with open("../Data/apple_quality.csv") as f1:
+    with open("./Data/apple_quality.csv") as f1:
         apple = pd.read_csv(f1)
     return apple
 
@@ -27,11 +26,6 @@ def split_train_test(data, test_ratio):
     return x_train, y_train, x_test, y_test
 
 
-def one_hot_encode(data):
-    encoder = OneHotEncoder()
-    encoder.fit(data)
-    return encoder.transform(data).toarray()
-
 def knn2(x_train, y_train, x_test, k):
     n = len(x_test)
     y_pred = np.zeros(n)
@@ -40,7 +34,6 @@ def knn2(x_train, y_train, x_test, k):
         idx = np.argsort(dist)[:k]
         y_pred[i] = np.argmax(np.bincount(y_train[idx]))
     return y_pred
-
 
 
 def calculateMeasure2(result, y_test):
@@ -71,9 +64,7 @@ def pca(trainSet, testSet, k):
         trainSet.T
     )  # U: eigenvectors, s: eigenvalues, V: eigenvectors
 
-    plt.plot(s)  # explained variance
-    plt.xlabel("Number of Components")
-    plt.ylabel("Explained Variance")
+    plt.plot(s)
     plt.show()
     U = U[:, np.argsort(s)[::-1]]
     PCA = U[:, 0:k]
