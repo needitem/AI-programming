@@ -18,3 +18,4 @@ print("Accuracy: ", acc)
 print("Precision: ", pre)
 print("Recall: ", rec)
 print("F1: ", f1)
+
