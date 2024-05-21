@@ -1,53 +1,55 @@
-import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import os, sys
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from matplotlib.image import imread
+from PIL import Image
+import numpy as np
 
-apple = pd.read_csv("./Data/apple_quality.csv")
-apple["Quality"] = apple["Quality"].apply(lambda x: 1 if x == "good" else 0)
-columns = apple.columns
+os.chdir(os.path.dirname(__file__))
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-scaler = StandardScaler()
+image_raw = imread("../Data/train/bad/IMG_20190824_175205.png")
+# pixel :256 * 192 * 3
+print(image_raw.shape)
 
-x = apple.drop(columns=["Quality"]).values
-y = apple["Quality"].values
+plt.figure(figsize=[12, 8])
+plt.imshow(image_raw)
 
-x = scaler.fit_transform(x)
+image_sum = image_raw.sum(axis=2)
+print(image_sum.shape)
 
-pca = PCA(n_components=len(x[0]))
-principalComponents = pca.fit_transform(x)
-principalDf = pd.DataFrame(
-    data=principalComponents, columns=[f"PC{i}" for i in range(1, len(x[0]) + 1)]
-)
+image_bw = image_sum / image_sum.max()
+print(image_bw.max())
 
-finalDf = pd.concat([principalDf, apple[["Quality"]]], axis=1)
+plt.figure(figsize=[12, 8])
+plt.imshow(image_bw, cmap="gray")
 
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(1, 1, 1)
-ax.set_xlabel("Principal Component 1", fontsize=15)
-ax.set_ylabel("Principal Component 2", fontsize=15)
-ax.set_title("2 component PCA", fontsize=20)
+from sklearn.decomposition import PCA, IncrementalPCA
 
-# draw the eigenVectors, the direction of the most variance. The longer the vector, the more variance. draw lines from the mean to the eigenVectors
-for i, v in enumerate(pca.components_):
-    ax.plot(
-        [0, v[0] * 3],
-        [0, v[1] * 3],
-        color="black",
-        lw=2,
-    )
-    ax.text(v[0] * 3, v[1] * 3, columns[i], ha="right")
+pca = PCA()
+pca.fit(image_bw)
 
-targets = [0, 1]
-colors = ["r", "g"]
-for target, color in zip(targets, colors):
-    indicesToKeep = finalDf["Quality"] == target
-    ax.scatter(
-        finalDf.loc[indicesToKeep, "PC1"],
-        finalDf.loc[indicesToKeep, "PC2"],
-        c=color,
-        s=50,
-    )
-ax.legend(targets)
-ax.grid()
+# Getting the cumulative variance
+
+var_cumu = np.cumsum(pca.explained_variance_ratio_) * 100
+
+# How many PCs explain 95% of the variance?
+k = np.argmax(var_cumu > 95)
+print("Number of components explaining 95% variance: " + str(k))
+# print("\n")
+
+plt.figure(figsize=[10, 5])
+plt.title("Cumulative Explained Variance explained by the components")
+plt.ylabel("Cumulative Explained variance")
+plt.xlabel("Principal components")
+plt.axvline(x=k, color="k", linestyle="--")
+plt.axhline(y=95, color="r", linestyle="--")
+ax = plt.plot(var_cumu)
+
+ipca = IncrementalPCA(n_components=k)
+image_recon = ipca.inverse_transform(ipca.fit_transform(image_bw))
+
+# Plotting the reconstructed image
+plt.figure(figsize=[12, 8])
+plt.imshow(image_recon, cmap=plt.cm.gray)
 plt.show()
