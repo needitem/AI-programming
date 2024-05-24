@@ -15,10 +15,10 @@ image_bad_directory = "../Data/train/bad"
 # pixel :256 * 192 * 3
 
 
-# Select a random 5 images from the good apple directory, bad apple directory
+# Select a random 10 images from the good apple directory, bad apple directory
 def select_random_images(directory):
     images = []
-    for i in range(5):
+    for i in range(10):
         image = imread(os.path.join(directory, np.random.choice(os.listdir(directory))))
         images.append(image)
     return images
@@ -26,7 +26,7 @@ def select_random_images(directory):
 
 # histogram for images
 def histogram_images(images, title):
-    fig, axs = plt.subplots(1, 5, figsize=(20, 4))
+    fig, axs = plt.subplots(1, 10, figsize=(20, 4))
     for i, image in enumerate(images):
         axs[i].hist(image[:, :, 0].flatten(), bins=256, color="red", alpha=0.5)
         axs[i].hist(image[:, :, 1].flatten(), bins=256, color="green", alpha=0.5)
