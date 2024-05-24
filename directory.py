@@ -39,5 +39,18 @@ if not os.path.exists(test_dir_bad):
 if not os.path.exists(train_dir_bad):
     os.makedirs(train_dir_bad)
 
-split_files("Data/Apple_Good", 0.2, test_dir_good, train_dir_good)
-split_files("Data/Apple_Bad", 0.2, test_dir_bad, train_dir_bad)
+
+def shuffle_files():
+    for i in os.listdir(test_dir_good):
+        os.rename(os.path.join(test_dir_good, i), os.path.join("Data/Apple_Good", i))
+    for i in os.listdir(train_dir_good):
+        os.rename(os.path.join(train_dir_good, i), os.path.join("Data/Apple_Good", i))
+    for i in os.listdir(test_dir_bad):
+        os.rename(os.path.join(test_dir_bad, i), os.path.join("Data/Apple_Bad", i))
+    for i in os.listdir(train_dir_bad):
+        os.rename(os.path.join(train_dir_bad, i), os.path.join("Data/Apple_Bad", i))
+    split_files("Data/Apple_Good", 0.2, test_dir_good, train_dir_good)
+    split_files("Data/Apple_Bad", 0.2, test_dir_bad, train_dir_bad)
+
+
+shuffle_files()
