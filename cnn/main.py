@@ -19,7 +19,14 @@ test_path = "Data/test"
 # Data augmentation and preprocessing for training
 datagen = ImageDataGenerator(
     rescale=1.0 / 255.0,
-    validation_split=0.2,
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    shear_range=0.2,
+    zoom_range=0.2,
+    horizontal_flip=True,
+    fill_mode="nearest",
+    validation_split=0.1,
 )
 
 test_datgen = ImageDataGenerator(rescale=1.0 / 255.0)
@@ -65,19 +72,27 @@ model = Sequential(
         Dense(2, activation="softmax"),
     ]
 )
+model.summary()
 
-# Compile the model
+# Compile the model with a reduced learning rate
 model.compile(
-    optimizer="adam",
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
     loss="categorical_crossentropy",
     metrics=["accuracy"],
+)
+
+# Introduce EarlyStopping callback to prevent overfitting
+early_stopping = tf.keras.callbacks.EarlyStopping(
+    monitor="val_loss", patience=5, restore_best_weights=True
 )
 
 # Train the model
 history = model.fit(
     train_data,
-    epochs=10,
     validation_data=val_data,
+    epochs=10,
+    callbacks=[early_stopping],
+    verbose=1,
 )
 
 # Evaluate the model on the training data
